@@ -1,0 +1,4 @@
+__pycache__
+build
+remote_donation.egg-info
+weights.pt
