@@ -3,6 +3,8 @@ from time import sleep, time
 from remote_donation.models.enums.Classes import Classes
 from remote_donation.models.enums.States import States
 from remote_donation.states.shared_utils.format_image import format_image
+from remote_donation.utils.lcd import clear_det_lcd, clear_info_lcd, print_det_lcd, print_info_lcd
+from remote_donation.utils.leds import yellow_led_off, yellow_led_on
 
 
 def _get_class_frequency(cls, detected_q):
@@ -12,14 +14,29 @@ def _get_class_frequency(cls, detected_q):
             freq += 1
     return freq
 
+# Since we can have 2 states,
+# make a common cleanup func.
+def _cleanup(cap):
+    yellow_led_off()
+    clear_info_lcd()
+    clear_det_lcd()
+    cap.release()
+
 def identifying(state_machine):
     # LED amarelo ativo
+    yellow_led_on()
 
     # - Detecção
-    # IDENTIFICANDO
+    print_det_lcd([
+        "IDENTIFICANDO...",
+        "NÃO MOVA O ITEM"
+    ])
 
     # - Info
-    # Não mova o item
+    print_info_lcd([
+        "Aguarde o item",
+        "ser identificado"
+    ])
 
     # For webcam input:
     cap = cv2.VideoCapture(0)
@@ -64,11 +81,11 @@ def identifying(state_machine):
         if chosen_freq < int(state_machine.detection_queue.maxlen * 0.2):
             state_machine.current_class = None
             print("State changed:", States.IDENTIFYING, "->", States.ID_FAILURE)
-            cap.release()
+            _cleanup(cap)
             return States.ID_FAILURE
         elif chosen_freq >= int(state_machine.detection_queue.maxlen * 0.8):
             print("State changed:", States.IDENTIFYING, "->", States.ID_SUCCESS)
-            cap.release()
+            _cleanup(cap)
             return States.ID_SUCCESS 
 
     cap.release()

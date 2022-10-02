@@ -4,6 +4,8 @@ from time import sleep, time
 from remote_donation.models.enums.Classes import Classes
 from remote_donation.models.enums.States import States
 from remote_donation.states.shared_utils.format_image import format_image
+from remote_donation.utils.lcd import clear_det_lcd, clear_info_lcd, print_det_lcd, print_info_lcd
+from remote_donation.utils.leds import blue_led_off, blue_led_on
 
 def _get_max_frequency(detected, percentage=1):
     freq = 0
@@ -25,14 +27,20 @@ def waiting_donation(state_machine):
     # - Detecção
     # AGUARDANDO
     # ITEM NA CAMERA
+    print_det_lcd([
+        "AGUARDANDO O",
+        "ITEM NA CAMERA.."
+    ])
 
 
     # - Info
-    # Mostre o Item
-    # Para a Câmera
+    print_info_lcd([
+        "Mostre o Item Na",
+        "Frente Da Camera"
+    ])
 
-    # Piscar o LED azul
-    # criar thread com variavel que checa aqui bacaninha.
+    # TODO: Piscar o LED azul
+    blue_led_on()
  
     # For webcam input:
     cap = cv2.VideoCapture(0)
@@ -89,6 +97,9 @@ def waiting_donation(state_machine):
             cap.release()
             while len(state_machine.detection_queue) > freq:
                 state_machine.detection_queue.pop()
+            blue_led_off()
+            clear_det_lcd()
+            clear_info_lcd()
             return States.IDENTIFYING
 
     cap.release()
