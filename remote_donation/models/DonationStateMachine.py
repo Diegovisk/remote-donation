@@ -7,13 +7,16 @@ from remote_donation.states.id_failure import id_failure
 from remote_donation.states.waiting_delivery import waiting_delivery
 from remote_donation.states.delivery_success import delivery_success
 from remote_donation.states.delivery_failure import delivery_failure
+import os
 
 import torch
 import torch.utils.checkpoint
 
+dirname = os.path.dirname(__file__)
+
 class DonationStateMachine:
 
-    MODEL_PATH = "../artifacts/weights.pt"
+    MODEL_PATH = os.path.join(dirname,"../artifacts/weights.pt")
 
     STATES = {
         States.WAITING_DONATION : waiting_donation,
