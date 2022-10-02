@@ -1,8 +1,9 @@
-import i2c_lcd_driver
-import i2c_lcd_driver_26
 
-LCD_DET = i2c_lcd_driver.lcd()
-LCD_INFO = i2c_lcd_driver_26.lcd()
+from remote_donation.utils.i2c_lcd_driver import lcd as LcdDet
+from remote_donation.utils.i2c_lcd_driver_26 import lcd as LcdInfo
+
+LCD_DET = LcdDet()
+LCD_INFO = LcdInfo()
 
 def print_det_lcd(msgs):
     LCD_DET.lcd_clear()
