@@ -13,7 +13,7 @@ import torch.utils.checkpoint
 
 class DonationStateMachine:
 
-    MODEL_PATH = "./modelos_embarcados/Nano_datasetv1_25-09-2022_08_20_15_yv5/weights/best.pt"
+    MODEL_PATH = "../artifacts/weights.pt"
 
     STATES = {
         States.WAITING_DONATION : waiting_donation,
@@ -27,7 +27,7 @@ class DonationStateMachine:
 
     def __init__(self, queue_size=14, image_size=(600, 600), detection_time_threshold=0.5):
         self.__state = States.WAITING_DONATION
-        self.model = torch.hub.load('./yolov5', 'custom', path=self.MODEL_PATH, source='local')  # or yolov5n - yolov5x6, custom
+        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path=self.MODEL_PATH, source='local')  # or yolov5n - yolov5x6, custom
         self.detection_queue = deque(maxlen=queue_size)
         self.image_size = image_size
         self.detection_time_threshold = detection_time_threshold
