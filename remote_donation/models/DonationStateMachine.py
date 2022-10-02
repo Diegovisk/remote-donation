@@ -27,7 +27,7 @@ class DonationStateMachine:
 
     def __init__(self, queue_size=14, image_size=(600, 600), detection_time_threshold=0.5):
         self.__state = States.WAITING_DONATION
-        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path=self.MODEL_PATH, source='local')  # or yolov5n - yolov5x6, custom
+        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path=self.MODEL_PATH)  # or yolov5n - yolov5x6, custom
         self.detection_queue = deque(maxlen=queue_size)
         self.image_size = image_size
         self.detection_time_threshold = detection_time_threshold
