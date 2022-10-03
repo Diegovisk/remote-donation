@@ -20,3 +20,15 @@ def clear_info_lcd():
 
 def clear_det_lcd():
     LCD_DET.lcd_clear()
+
+def det_backlight_on():
+    LCD_DET.backlight(1)
+
+def det_backlight_off():
+    LCD_DET.backlight(0)
+
+def info_backlight_on():
+    LCD_INFO.backlight(1)
+
+def info_backlight_off():
+    LCD_INFO.backlight(0)
