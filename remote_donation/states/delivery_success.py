@@ -7,7 +7,7 @@ import requests
 
 def delivery_success(state_machine):
     state_machine.send_cap = True
-    print("DELIVERY_SUCCESS")
+    state_machine.log_print("DELIVERY_SUCCESS")
 
     green_led_on()
 
@@ -27,5 +27,5 @@ def delivery_success(state_machine):
     
     sleep(1)
 
-    print("State changed:", States.DELIVERY_SUCCESS, "->", States.WAITING_DONATION)
+    state_machine.log_print("State changed:", States.DELIVERY_SUCCESS, "->", States.WAITING_DONATION)
     return States.WAITING_DONATION

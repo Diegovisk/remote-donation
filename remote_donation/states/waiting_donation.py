@@ -80,7 +80,7 @@ def waiting_donation(state_machine):
             state_machine.detection_queue.appendleft(Classes.NONE)
 
         # PRINT THE QUEUE
-        print(state_machine.detection_queue)
+        state_machine.log_print(state_machine.detection_queue)
         
         # frequency of detection for each class
         for det in state_machine.detection_queue:
@@ -101,7 +101,7 @@ def waiting_donation(state_machine):
             clear_det_lcd()
             clear_info_lcd()
             
-            print("State changed:", States.WAITING_DONATION, "->", States.IDENTIFYING)
+            state_machine.log_print("State changed:", States.WAITING_DONATION, "->", States.IDENTIFYING)
             return States.IDENTIFYING
 
     cap.release()

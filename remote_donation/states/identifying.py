@@ -56,8 +56,6 @@ def identifying(state_machine):
 
         results = state_machine.model(im)
 
-        results.print()
-
         last_capture = time()
 
     	# Check if there is a detection
@@ -73,18 +71,18 @@ def identifying(state_machine):
             state_machine.detection_queue.appendleft(Classes.NONE)
 
         # PRINT THE QUEUE
-        print(state_machine.detection_queue)
+        state_machine.log_print(state_machine.detection_queue)
 
         chosen_freq = _get_class_frequency(state_machine.current_class, state_machine.detection_queue)
         
         # If 60% of the last MAXLEN detections are the same class
         if chosen_freq < int(state_machine.detection_queue.maxlen * 0.2):
             state_machine.current_class = None
-            print("State changed:", States.IDENTIFYING, "->", States.ID_FAILURE)
+            state_machine.log_print("State changed:", States.IDENTIFYING, "->", States.ID_FAILURE)
             _cleanup(cap)
             return States.ID_FAILURE
         elif chosen_freq >= int(state_machine.detection_queue.maxlen * 0.8):
-            print("State changed:", States.IDENTIFYING, "->", States.ID_SUCCESS)
+            state_machine.log_print("State changed:", States.IDENTIFYING, "->", States.ID_SUCCESS)
             _cleanup(cap)
             return States.ID_SUCCESS 
 

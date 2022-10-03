@@ -5,7 +5,7 @@ from remote_donation.utils.leds import red_led_off, red_led_on
 
 
 def id_failure(state_machine):
-    print("ID_FAILURE")
+    state_machine.log_print("ID_FAILURE")
     
     red_led_on()
 
@@ -25,5 +25,5 @@ def id_failure(state_machine):
     clear_info_lcd()
     red_led_off()
 
-    print("State changed:", States.ID_FAILURE, "->", States.WAITING_DONATION)
+    state_machine.log_print("State changed:", States.ID_FAILURE, "->", States.WAITING_DONATION)
     return States.WAITING_DONATION

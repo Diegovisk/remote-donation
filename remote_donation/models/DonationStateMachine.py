@@ -1,4 +1,5 @@
 from collections import deque
+from datetime import datetime
 from threading import Thread
 from time import sleep
 from remote_donation.models.enums.States import States
@@ -10,6 +11,7 @@ from remote_donation.states.waiting_delivery import waiting_delivery
 from remote_donation.states.delivery_success import delivery_success
 from remote_donation.states.delivery_failure import delivery_failure
 import os
+import requests
 
 from paho.mqtt import client as mqtt_client
 
@@ -17,6 +19,9 @@ import torch
 import torch.utils.checkpoint
 
 from remote_donation.utils.distance import distance
+from remote_donation.utils.lcd import clear_det_lcd, clear_info_lcd
+from remote_donation.utils.leds import blue_led_off, green_led_off, red_led_off, yellow_led_off
+from remote_donation.utils.solenoid_relay import close_lock
 
 dirname = os.path.dirname(__file__)
 
@@ -39,9 +44,10 @@ class DonationStateMachine:
     SERVER = "192.168.15.11"
     URL = "http://"+SERVER+":5000"
 
-    def __init__(self, ID, queue_size=14, image_size=(600, 600), detection_time_threshold=0.5):
+    def __init__(self, ID, queue_size=10, image_size=(600, 600), detection_time_threshold=0.25, debug=True):
         self.__state = States.WAITING_DONATION
         self.ID = ID
+        self.DEBUG = debug
         self.model = torch.hub.load('ultralytics/yolov5', 'custom', path=self.MODEL_PATH)  # or yolov5n - yolov5x6, custom
         self.detection_queue = deque(maxlen=queue_size)
         self.image_size = image_size
@@ -52,14 +58,12 @@ class DonationStateMachine:
         # self.opened_bucket_queue = 0.0
 
         self.current_class = None
+        self.halt = False
 
         # Configurate the model (https://github.com/ultralytics/yolov5/issues/36)
         self.model.max_det = 1
         self.model.conf = 0.5
         self.model.iou = 0.5
-
-        # TODO: CHANGE PRINTS TO LOGS AND MQTT MESSAGES
-        print("STATE MACHINE STARTED!")
 
         # Start MQTT
         self.client = mqtt_client.Client("CAIXA_" + str(self.ID))
@@ -67,9 +71,39 @@ class DonationStateMachine:
         self.client.connect(self.SERVER, 1883)
         self.send_cap = True
 
+        blue_led_off()
+        green_led_off()
+        yellow_led_off()
+        red_led_off()
+
+        clear_det_lcd()
+        clear_info_lcd()
+
+        close_lock()
+
+
+        # TODO: CHANGE PRINTS TO LOGS AND MQTT MESSAGES
+        self.log_print("STATE MACHINE STARTED!")
+
+    def run(self):
         T = Thread(target=self.__capacity_daemon)
         T.setDaemon(True)
         T.start()
+        
+        self.__loop()
+
+    def log_print(self, *msgs):
+        if self.DEBUG:
+            msg = ""
+            for m in msgs:
+                msg += str(m) + " "
+            msg = str(msg)
+            msg = "[" + str(datetime.now()) + "] " + msg
+            print(msg)
+            try:
+                self.client.publish("/caixas/" + str(self.ID) + "/debug", msg)
+            except:
+                print("Could not publish to MQTT broker. Check your connection and restart the State Machine.")
 
     def __capacity_daemon(self):
         sleep_secs = 10
@@ -78,9 +112,19 @@ class DonationStateMachine:
                 sleep(sleep_secs)
                 continue    
             current_cap = distance()
-            self.client.publish("/caixas/" + str(self.ID) + "/capacidade", str(round(current_cap,2)) + "cm")
-            sleep(sleep_secs)
+            
+            try:
+                self.client.publish("/caixas/" + str(self.ID) + "/capacidade", str(round(current_cap,2)) + "cm")
+            except:
+                print("Could not publish to MQTT broker. Check your connection and restart the State Machine.")
+            try:
+                requests.post(url=self.URL + "/capacidade/" + str(self.ID), data={
+                    "capacidade": current_cap
+                })
+            except:
+                print("Something went wrong with your POST to the server.")
 
+            sleep(sleep_secs)
 
     def __on_connect(client, user, flags, rc):
         if rc == 0:
@@ -91,6 +135,6 @@ class DonationStateMachine:
     def __get_state(self, state):
         return self.STATES[state](self)
 
-    def run(self):
+    def __loop(self):
         while True:
             self.__state = self.__get_state(self.__state)

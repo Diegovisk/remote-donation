@@ -7,7 +7,7 @@ from remote_donation.utils.leds import green_led_off, green_led_on
 
 
 def id_success(state_machine):
-    print("ID_SUCCESS")
+    state_machine.log_print("ID_SUCCESS")
 
     #################
     # - Detecção
@@ -39,5 +39,5 @@ def id_success(state_machine):
     green_led_off()
     # clear_det_lcd() # we dont turn it off for our next state
 
-    print("State changed:", States.ID_SUCCESS, "->", States.WAITING_DELIVERY)
+    state_machine.log_print("State changed:", States.ID_SUCCESS, "->", States.WAITING_DELIVERY)
     return States.WAITING_DELIVERY

@@ -43,7 +43,7 @@ def waiting_delivery(state_machine):
             # DET LCD was open from our last state
             clear_det_lcd()
 
-            print("State changed:", States.WAITING_DELIVERY, "->", States.DELIVERY_SUCCESS)
+            state_machine.log_print("State changed:", States.WAITING_DELIVERY, "->", States.DELIVERY_SUCCESS)
             return States.DELIVERY_SUCCESS
         current_time = time()
 
@@ -54,5 +54,5 @@ def waiting_delivery(state_machine):
 
     close_lock()
 
-    print("State changed:", States.WAITING_DELIVERY, "->", States.DELIVERY_FAILURE) 
+    state_machine.log_print("State changed:", States.WAITING_DELIVERY, "->", States.DELIVERY_FAILURE) 
     return States.DELIVERY_FAILURE

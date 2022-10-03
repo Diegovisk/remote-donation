@@ -7,7 +7,7 @@ from remote_donation.utils.leds import red_led_off, red_led_on
 
 def delivery_failure(state_machine):
     state_machine.send_cap = True
-    print("DELIVERY_FAILURE")
+    state_machine.log_print("DELIVERY_FAILURE")
     
     red_led_on()
 
@@ -28,5 +28,5 @@ def delivery_failure(state_machine):
     red_led_off()
 
 
-    print("State changed:", States.DELIVERY_FAILURE, "->", States.WAITING_DONATION)
+    state_machine.log_print("State changed:", States.DELIVERY_FAILURE, "->", States.WAITING_DONATION)
     return States.WAITING_DONATION
