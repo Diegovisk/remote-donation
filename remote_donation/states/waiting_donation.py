@@ -93,13 +93,15 @@ def waiting_donation(state_machine):
         if freq > int(state_machine.detection_queue.maxlen * 0.4) and cls != Classes.NONE:
             # state_machine.state = States.IDENTIFYING
             state_machine.current_class = cls
-            print("State changed:", States.WAITING_DONATION, "->", States.IDENTIFYING)
+            
             cap.release()
             while len(state_machine.detection_queue) > freq:
                 state_machine.detection_queue.pop()
             blue_led_off()
             clear_det_lcd()
             clear_info_lcd()
+            
+            print("State changed:", States.WAITING_DONATION, "->", States.IDENTIFYING)
             return States.IDENTIFYING
 
     cap.release()
