@@ -71,7 +71,10 @@ def identifying(state_machine):
             state_machine.detection_queue.appendleft(Classes.NONE)
 
         # PRINT THE QUEUE
-        state_machine.log_print(state_machine.detection_queue)
+        log = "FILA: "
+        for i in state_machine.detection_queue:
+            log += i._name_ + "; "
+        state_machine.log_print(log)
 
         chosen_freq = _get_class_frequency(state_machine.current_class, state_machine.detection_queue)
         

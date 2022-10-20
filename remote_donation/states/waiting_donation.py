@@ -7,15 +7,10 @@ from remote_donation.states.shared_utils.format_image import format_image
 from remote_donation.utils.lcd import clear_det_lcd, clear_info_lcd, print_det_lcd, print_info_lcd
 from remote_donation.utils.leds import blue_led_off, blue_led_on
 
-def _get_max_frequency(detected, percentage=1):
+def _get_max_frequency(detected):
     freq = 0
     class_ = None
-    max_n = int(len(detected) * percentage)
-    i = 0
     for c, f in detected.items():
-        if i > max_n:
-            break
-        i += 1
         if f > freq:
             freq = f
             class_ = c
@@ -80,14 +75,21 @@ def waiting_donation(state_machine):
             state_machine.detection_queue.appendleft(Classes.NONE)
 
         # PRINT THE QUEUE
-        state_machine.log_print(state_machine.detection_queue)
+        log = "FILA: "
+        for i in state_machine.detection_queue:
+            log += i._name_ + "; "
+        state_machine.log_print(log)
         
         # frequency of detection for each class
+        max_n = state_machine.detection_queue.maxlen * 0.6
+        i = 0
         for det in state_machine.detection_queue:
+            if i > max_n:
+                break
+            i += 1
             detected_freq[Classes(det)] += 1
 
-        # We aim to detect 1/2 of the queue and see if in it we have enough detections
-        freq, cls = _get_max_frequency(detected_freq, 0.6)
+        freq, cls = _get_max_frequency(detected_freq)
 
         # If 60% of the last MAXLEN detections are the same class
         if freq > int(state_machine.detection_queue.maxlen * 0.4) and cls != Classes.NONE:
